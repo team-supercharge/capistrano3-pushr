@@ -1,10 +1,10 @@
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'capistrano3/pushr/version'
+require 'capistrano/pushr/version'
 
 Gem::Specification.new do |gem|
   gem.name          = 'capistrano3-pushr'
-  gem.version       = Capistrano3::Pushr::VERSION
+  gem.version       = Capistrano::Pushr::VERSION
   gem.authors       = ['Zsofia Balogh']
   gem.email         = ['zsofia.balogh@supercharge.io']
   gem.description   = 'Pushr specific Capistrano tasks'

@@ -16,5 +16,5 @@ Or install it yourself as:
 In your `Capfile` add
 
 ```ruby
-require 'capistrano3-pushr'
+require 'capistrano/pushr'
 ```
