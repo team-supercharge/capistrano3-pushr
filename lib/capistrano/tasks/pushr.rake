@@ -90,6 +90,15 @@ namespace :pushr do
     pushr_pid_file_exists? && test(*("kill -0 `#{pid_command}`").split(' '))
   end
 
+  def pushr_redis_host
+    return pushr_redis_host_file_content if fetch(:pushr_redis_host_file)
+    fetch(:pushr_redis_host)
+  end
+
+  def pushr_redis_host_file_content
+    capture('cat', File.join(shared_path, fetch(:pushr_redis_host_file)))
+  end
+
   def stop_pushr(signal)
     return unless test("[ -d #{release_path} ]") && pushr_pid_process_exists?
 
@@ -105,7 +114,7 @@ namespace :pushr do
       args = []
       args.push "--pid-file #{fetch(:pushr_pid)}"
       args.push "--configuration #{fetch(:pushr_configuration)}"
-      args.push "--redis-host #{fetch(:pushr_redis_host)}"
+      args.push "--redis-host #{pushr_redis_host}"
       args.push "--redis-port #{fetch(:pushr_redis_port)}"
       args.push "--redis-namespace #{fetch(:pushr_redis_namespace)}"
 
