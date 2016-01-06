@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/capistrano3-pushr.svg)](https://badge.fury.io/rb/capistrano3-pushr)
+
 # Pushr Capistrano 3.x integration
 
 ## Installation
