@@ -3,6 +3,11 @@ namespace :load do
     set :pushr_default_hooks, -> { true }
 
     set :pushr_pid, -> { File.join shared_path, 'tmp', 'pids', 'pushr.pid' }
+    set :pushr_configuration, -> { File.join shared_path, 'config', 'pushr.yml' }
+    set :pushr_env, -> { fetch(:rack_env, fetch(:rails_env, fetch(:stage))) }
+    set :pushr_redis_host, -> { fetch(:redis_host, 'localhost') }
+    set :pushr_redis_port, -> { fetch(:redis_port, '6379') }
+    set :pushr_redis_namespace, -> { fetch(:redis_namespace, "pushr_#{fetch(:application)}_#{fetch(:stage)}") }
   end
 end
 
@@ -77,16 +82,16 @@ namespace :pushr do
     "cat #{fetch(:pushr_pid)}"
   end
 
-  def pid_file_exists?
+  def pushr_pid_file_exists?
     test(*("[ -f #{fetch(:pushr_pid)} ]").split(' '))
   end
 
-  def pid_process_exists?
-    pid_file_exists? && test(*("kill -0 `#{pid_command}`").split(' '))
+  def pushr_pid_process_exists?
+    pushr_pid_file_exists? && test(*("kill -0 `#{pid_command}`").split(' '))
   end
 
   def stop_pushr(signal)
-    return unless test("[ -d #{release_path} ]") && pid_process_exists?
+    return unless test("[ -d #{release_path} ]") && pushr_pid_process_exists?
 
     within release_path do
       puts 'Stopping Pushr...'
@@ -97,8 +102,17 @@ namespace :pushr do
 
   def start_pushr
     within release_path do
+      args = []
+      args.push "--pid-file #{fetch(:pushr_pid)}"
+      args.push "--configuration #{fetch(:pushr_configuration)}"
+      args.push "--redis-host #{fetch(:pushr_redis_host)}"
+      args.push "--redis-port #{fetch(:pushr_redis_port)}"
+      args.push "--redis-namespace #{fetch(:pushr_redis_namespace)}"
+
       puts 'Starting Pushr...'
-      execute 'bundle', 'exec', 'pushr', '--pid-file', fetch(:pushr_pid)
+      with rack_env: fetch(:pushr_env) do
+        execute 'bundle', 'exec', 'pushr', args.compact.join(' ')
+      end
       puts 'done!'
     end
   end
