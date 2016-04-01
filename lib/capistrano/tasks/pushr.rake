@@ -5,6 +5,7 @@ namespace :load do
     set :pushr_pid, -> { File.join shared_path, 'tmp', 'pids', 'pushr.pid' }
     set :pushr_configuration, -> { File.join shared_path, 'config', 'pushr.yml' }
     set :pushr_env, -> { fetch(:rack_env, fetch(:rails_env, fetch(:stage))) }
+    set :pushr_certificates, -> { File.join 'config', 'push' }
     set :pushr_redis_host, -> { fetch(:redis_host, 'localhost') }
     set :pushr_redis_port, -> { fetch(:redis_port, '6379') }
     set :pushr_redis_namespace, -> { fetch(:redis_namespace, "pushr_#{fetch(:application)}_#{fetch(:stage)}") }
@@ -72,6 +73,13 @@ namespace :pushr do
     end
   end
 
+  desc 'Upload certificates.'
+  task :upload_certificates do
+    on roles(fetch(:pushr_roles, :all)) do
+      upload_certificates
+    end
+  end
+
   ###
 
   def pid
@@ -130,5 +138,9 @@ namespace :pushr do
     within release_path do
       puts capture('bundle', 'exec', 'pushr', '--version')
     end
+  end
+
+  def upload_certificates
+    upload! fetch(:pushr_certificates), File.join(shared_path, 'config'), recursive: true
   end
 end
